@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Kitchensink</title>
+</head>
+<body>
+<h1>Member Registration</h1>
+
+<div th:if="${successMessage}" th:text="${successMessage}" style="color:green;"></div>
+<div th:if="${errorMessage}" th:text="${errorMessage}" style="color:red;"></div>
+
+<form th:action="@{/members/register}" th:object="${newMember}" method="post">
+    <label>Name: <input type="text" th:field="*{name}"/></label><br/>
+    <label>Email: <input type="email" th:field="*{email}"/></label><br/>
+    <label>Phone: <input type="text" th:field="*{phoneNumber}"/></label><br/>
+    <input type="submit" value="Register"/>
+</form>
+
+<h2>Members</h2>
+<table>
+    <tr><th>Id</th><th>Name</th><th>Email</th><th>Phone</th></tr>
+    <tr th:each="member : ${members}">
+        <td th:text="${member.id}"></td>
+        <td th:text="${member.name}"></td>
+        <td th:text="${member.email}"></td>
+        <td th:text="${member.phoneNumber}"></td>
+    </tr>
+</table>
+</body>
+</html>
