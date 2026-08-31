@@ -1,11 +1,10 @@
 package com.example.kitchensink.repository;
 
-import jakarta.persistence.NoResultException;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 
 import com.example.kitchensink.model.Member;
@@ -15,6 +14,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 // Covers gaps #6, #7, and #14 from reverse_en/test-behavior.md §3.
 // Source: ejb/src/main/java/.../data/MemberRepository.java (findById, findByEmail, getSingleResult edge cases)
+// Spring Data JPA translates JPA exceptions:
+//   NoResultException        -> EmptyResultDataAccessException
+//   NonUniqueResultException -> IncorrectResultSizeDataAccessException
 @DataJpaTest
 class MemberRepositoryTest {
 
@@ -38,11 +40,13 @@ class MemberRepositoryTest {
         assertThat(memberRepository.findById(Long.MAX_VALUE)).isEmpty();
     }
 
-    // Gap #6: findByEmail not-found — must throw NoResultException (preserved from legacy getSingleResult)
+    // Gap #6: findByEmail not-found — throws EmptyResultDataAccessException.
+    // Spring Data translates JPA NoResultException to EmptyResultDataAccessException;
+    // this preserves the "exception on not-found" contract of the legacy getSingleResult() call.
     @Test
-    void findByEmail_notFound_throwsNoResultException() {
+    void findByEmail_notFound_throwsEmptyResultDataAccessException() {
         assertThatThrownBy(() -> memberRepository.findByEmail("nobody@example.com"))
-                .isInstanceOf(NoResultException.class);
+                .isInstanceOf(EmptyResultDataAccessException.class);
     }
 
     // findByEmail happy path — returns correct member
@@ -64,12 +68,11 @@ class MemberRepositoryTest {
                 .containsExactly("Alice", "Bob", "Charlie");
     }
 
-    // Gap #14: NonUniqueResultException propagates when duplicate email rows exist in DB.
-    // The unique constraint is dropped via native SQL (H2 constraint named explicitly in entity annotation)
-    // to simulate broken DB state. Spring Data JPA wraps the JPA NonUniqueResultException in
-    // IncorrectResultSizeDataAccessException — the unguarded failure path still propagates unchecked.
+    // Gap #14: IncorrectResultSizeDataAccessException propagates when duplicate email rows exist in DB.
+    // The unique constraint (named uq_aa_registrant_email) is dropped via native SQL to simulate broken DB state.
+    // Spring Data translates JPA NonUniqueResultException to IncorrectResultSizeDataAccessException — unguarded path.
     @Test
-    void findByEmail_duplicateEmailInDb_throwsException() {
+    void findByEmail_duplicateEmailInDb_throwsIncorrectResultSizeException() {
         em.getEntityManager()
                 .createNativeQuery("ALTER TABLE AA_Registrant DROP CONSTRAINT IF EXISTS uq_aa_registrant_email")
                 .executeUpdate();
