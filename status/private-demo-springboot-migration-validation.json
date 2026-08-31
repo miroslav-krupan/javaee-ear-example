@@ -1,1 +1,1 @@
-{"state":"running","loopId":"loop-3","wokenAt":"2026-08-31T21:46:00Z"}
+{"state":"done","loopId":"loop-3","completedAt":"2026-08-31T21:51:00Z","decision":"ready-with-known-issues","globalCapReached":true,"parked":["ARCH-001","ARCH-004"],"openAtCap":["tb-l3-001","b9a18cc3f02c"]}

@@ -1,77 +1,75 @@
-# Validation Report — loop-2
+# Validation Report — loop-3 (FINAL)
 
 **Date:** 2026-08-31  
 **Coordinator:** private-demo-springboot-migration-validation  
-**Decision:** ❌ FAIL — 5 open findings require rework before loop-3
+**Decision:** ⚠️ READY WITH KNOWN ISSUES — global loop cap reached (loop-3 is final); PR marked ready for human review
 
 ---
 
-## Per-Validator Summary
+## Per-Validator Summary — loop-3
 
-| Validator | Result | New Findings |
+| Validator | Result | Notes |
 |---|---|---|
-| Build & Startup | ❌ FAIL | 1 open (mvn verify fails — test exception mismatch) |
-| Security | ✅ PASS | 3 pass (no new issues in migrated module) |
-| Test & Behavioral | ❌ FAIL | 1 open (wrong exception type in repo test) |
-| Architecture | ❌ FAIL | 3 still open (WebConfig, MemberListProducer, H2 scope) |
+| Build & Startup | ❌ FAIL | 1 open — `mvn verify` fails (test exception mismatch, persists from loop-2) |
+| Security | ✅ PASS | All clean; H2 datasource removal confirmed |
+| Test & Behavioral | ❌ FAIL | 1 open — same root cause as build fail |
+| Architecture | ⚠️ 2 parked | ARCH-001 + ARCH-004 parked after 3 loops; ARCH-005 resolved |
 
 ---
 
-## Resolved Since loop-1 ✅
+## Resolved Across All Loops ✅
 
 | ID | What was fixed |
 |---|---|
-| ARCH-002 | `web/primary/MemberController.java` added (Thymeleaf @Controller) |
-| ARCH-003 | `web/secondary/MemberControllerSecond.java` added with `@Value` config |
-| ARCH-006 | `MemberRepositoryTest` with `@DataJpaTest` added |
-| tb-001–008 | All 8 test coverage gaps now covered by `MemberValidationTest` + `MemberRepositoryTest` |
-| sec-001 | Legacy `ear/pom.xml` WebLogic password — not re-raised (out of migration scope) |
-| sec-002 | Legacy `ear/pom.xml` Log4j 1.x — not re-raised (not carried forward) |
+| ARCH-002 | `web/primary/MemberController.java` (Thymeleaf) added (loop-2) |
+| ARCH-003 | `web/secondary/MemberControllerSecond.java` + `@Value` config added (loop-2) |
+| ARCH-005 | H2 datasource moved to test-only scope; main `application.properties` now has PostgreSQL placeholder (loop-3) |
+| ARCH-006 | `MemberRepositoryTest` with `@DataJpaTest` added (loop-2) |
+| tb-001–008 | All 8 behavioral/boundary test coverage gaps filled (loop-2) |
+| sec-001–002 | Legacy `ear/pom.xml` issues — out of migration scope, not carried forward |
+| sec-004 | H2 dev credentials — resolved with H2 move to test scope (loop-3) |
 
 ---
 
-## Open Findings (blocking — require rework)
+## Known Issues (open at cap — human action required)
 
-### Build & Startup (1)
+### Parked (3 consecutive loops — chronic)
 
-| ID | Rule | Summary |
+| ID | Summary |
+|---|---|
+| ARCH-001-parked | `config/WebConfig.java` missing — context paths `/web`, `/web2` hardcoded in `@GetMapping` annotations; target §5 requires them configurable via `application.properties` |
+| ARCH-004-parked | `data/MemberListProducer.java` not eliminated — target §4 says remove it (JSF EL gone); persists as `@Component + @EventListener` in `data/` package not in target layout |
+
+### Open at cap (not yet chronic — 2 loops)
+
+| ID | Validator | Summary |
 |---|---|---|
-| c59c9b7b12da | build | `mvn verify` FAIL — `MemberRepositoryTest.findByEmail_notFound_throwsNoResultException` expects `jakarta.persistence.NoResultException` but receives `org.springframework.dao.EmptyResultDataAccessException` (Spring @Repository wraps it) |
-
-### Test & Behavioral (1)
-
-| ID | Rule | Summary |
-|---|---|---|
-| tb-l2-001 | test-failure | Same as above — test asserts wrong exception type; must catch `EmptyResultDataAccessException` or change assertion to `assertThat(result).isEmpty()` pattern |
-
-### Architecture (3)
-
-| ID | Rule | Summary |
-|---|---|---|
-| ARCH-001-L2 | cited-file-missing | `config/WebConfig.java` still missing; context paths `/web`, `/web2` hardcoded in controller annotations rather than configurable via `application.properties` |
-| ARCH-004-L2 | arch-drift | `data/MemberListProducer.java` still present — target §4 says eliminate; `data/` package not in target layout |
-| **ARCH-005-L2** | **spring-idiom** | **CRITICAL: H2 `scope=test` in `pom.xml` but `application.properties` configures H2 datasource — packaged fat jar will not boot** |
+| tb-l3-001 | test-behavioral | `MemberRepositoryTest.findByEmail_notFound` fails — `@Query` with non-Optional return gives `null` on no-match, not an exception. Fix: change return type to `Optional<Member>` and update test accordingly |
+| b9a18cc3f02c | build-startup | `mvn verify` FAIL (exit 1) — same root cause as tb-l3-001 |
 
 ---
 
-## Non-Blocking (known issues, do not block)
+## Non-Blocking Notes
 
-| ID | Validator | Status | Summary |
-|---|---|---|---|
-| sec-004 | security | info | H2 dev/test datasource empty password — acceptable for in-memory scope |
-
----
-
-## Parked Known Issues
-
-None (no finding has appeared open in ≥3 distinct loopIds yet).
+| ID | Summary |
+|---|---|
+| sec-004 (resolved) | Test-scope H2 uses `username=sa` empty password — acceptable for isolated test execution |
 
 ---
 
-## Next Loop: loop-3
+## Migration Completeness Summary
 
-Priority order for migration rework:
-1. **ARCH-005 (critical):** Fix H2 scope: change `<scope>test</scope>` → `<scope>runtime</scope>` in `kitchensink/pom.xml`, or replace datasource config with a proper runtime DB
-2. **tb-l2-001 / c59c9b7b12da:** Fix `MemberRepositoryTest.findByEmail_notFound` — assert `EmptyResultDataAccessException` (or use `Optional` pattern and assert empty)
-3. **ARCH-001:** Add `config/WebConfig.java` with configurable context paths, or move path values to `application.properties` with `@Value` injection
-4. **ARCH-004:** Delete `data/MemberListProducer.java` and its `data/` package; ensure controllers call service directly
+The WebLogic EAR (`kitchensink-ear`) has been successfully migrated to a **single Spring Boot 3.4 Maven module** targeting Java 21 / Jakarta EE 10. All major layers are complete:
+
+- **Persistence:** `Member` entity, `MemberRepository` (Spring Data JPA), Flyway schema migration
+- **Service:** `MemberRegistration` (`@Stateless` → `@Service`), CDI events → `ApplicationEventPublisher`
+- **Web (REST):** `MemberResourceRESTService` + `MemberResourceRESTServiceSecond` (`JAX-RS` → `@RestController`)
+- **Web (UI):** `MemberController` + `MemberControllerSecond` (JSF/Facelets → Thymeleaf `@Controller`)
+- **Config:** `@Value` injection replacing DeltaSpike `ConfigResolver`
+- **Tests:** Validation boundary tests, `@DataJpaTest`, `@WebMvcTest`, `@SpringBootTest`
+
+**Action required before production deployment:**
+1. Fix `MemberRepository.findByEmail` — change to `Optional<Member>` return type so tests pass and `mvn verify` goes green
+2. Decide on `data/MemberListProducer.java` — remove per target §4, or document why it was retained
+3. Add `config/WebConfig.java` (or `@Value`-inject context paths) per target §5, or accept hardcoded paths
+4. Replace commented PostgreSQL placeholder in `application.properties` with real datasource config before deployment
