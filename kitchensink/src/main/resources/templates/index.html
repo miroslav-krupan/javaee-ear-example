@@ -7,24 +7,31 @@
 <body>
 <h1>Member Registration</h1>
 
+<p>Enforces annotation-based constraints defined on the model class.</p>
+
 <div th:if="${successMessage}" th:text="${successMessage}" style="color:green;"></div>
 <div th:if="${errorMessage}" th:text="${errorMessage}" style="color:red;"></div>
 
 <form th:action="@{/members/register}" th:object="${newMember}" method="post">
     <label>Name: <input type="text" th:field="*{name}"/></label><br/>
     <label>Email: <input type="email" th:field="*{email}"/></label><br/>
-    <label>Phone: <input type="text" th:field="*{phoneNumber}"/></label><br/>
+    <label>Phone #: <input type="text" th:field="*{phoneNumber}"/></label><br/>
     <input type="submit" value="Register"/>
 </form>
 
 <h2>Members</h2>
-<table>
-    <tr><th>Id</th><th>Name</th><th>Email</th><th>Phone</th></tr>
+<em th:if="${#lists.isEmpty(members)}">No registered members.</em>
+<table th:if="${not #lists.isEmpty(members)}">
+    <tr><th>Id</th><th>Name</th><th>Email</th><th>Phone #</th><th>REST URL</th></tr>
     <tr th:each="member : ${members}">
         <td th:text="${member.id}"></td>
         <td th:text="${member.name}"></td>
         <td th:text="${member.email}"></td>
         <td th:text="${member.phoneNumber}"></td>
+        <td><a th:href="@{/rest/members/{id}(id=${member.id})}" th:text="'/rest/members/' + ${member.id}"></a></td>
+    </tr>
+    <tr>
+        <td colspan="5">REST URL for all members: <a th:href="@{/rest/members}">/rest/members</a></td>
     </tr>
 </table>
 </body>
