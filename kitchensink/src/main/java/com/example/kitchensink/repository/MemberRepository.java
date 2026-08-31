@@ -1,41 +1,30 @@
 package com.example.kitchensink.repository;
 
-import com.example.kitchensink.model.Member;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
-import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
+
+import jakarta.persistence.NoResultException;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import com.example.kitchensink.model.Member;
 
 // Source: ejb/src/main/java/.../data/MemberRepository.java
-// Changes: javax.* → jakarta.*, @ApplicationScoped → @Repository, @Inject → constructor injection
+// CDI @ApplicationScoped -> Spring @Repository / JpaRepository;
+// findByEmail preserves NoResultException semantics via Optional + explicit throw;
+// findAllOrderedByName uses JPQL ORDER BY preserving the Criteria API sort.
 @Repository
-public class MemberRepository {
+public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    private final EntityManager em;
+    @Query("SELECT m FROM Member m WHERE m.email = :email")
+    Optional<Member> findByEmailOptional(String email);
 
-    public MemberRepository(EntityManager em) {
-        this.em = em;
+    default Member findByEmail(String email) {
+        return findByEmailOptional(email).orElseThrow(NoResultException::new);
     }
 
-    public Member findById(Long id) {
-        return em.find(Member.class, id);
-    }
-
-    public Member findByEmail(String email) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Member> criteria = cb.createQuery(Member.class);
-        Root<Member> member = criteria.from(Member.class);
-        criteria.select(member).where(cb.equal(member.get("email"), email));
-        return em.createQuery(criteria).getSingleResult();
-    }
-
-    public List<Member> findAllOrderedByName() {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Member> criteria = cb.createQuery(Member.class);
-        Root<Member> member = criteria.from(Member.class);
-        criteria.select(member).orderBy(cb.asc(member.get("name")));
-        return em.createQuery(criteria).getResultList();
-    }
+    @Query("SELECT m FROM Member m ORDER BY m.name ASC")
+    List<Member> findAllOrderedByName();
 }
