@@ -20,7 +20,7 @@ import jakarta.validation.constraints.Size;
 // javax.persistence.* -> jakarta.persistence.*; @XmlRootElement removed (Jackson handles JSON);
 // @NotEmpty -> @NotBlank on email (Hibernate Validator 8.x); @Email -> jakarta.validation.constraints.Email
 @Entity
-@Table(name = "AA_Registrant", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
+@Table(name = "AA_Registrant", uniqueConstraints = @UniqueConstraint(name = "uq_aa_registrant_email", columnNames = "email"))
 public class Member implements Serializable {
 
     private static final long serialVersionUID = 1L;
