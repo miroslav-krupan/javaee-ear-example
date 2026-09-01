@@ -1,1 +1,1 @@
-{"state":"done","loopId":"loop-2","completedAt":"2026-09-01T00:55:00Z","mode":"rework","pendingSpecialists":[]}
+{"state":"running","loopId":"loop-3","wokenAt":"2026-09-01T01:15:00Z","mode":"rework","pendingSpecialists":["persistence","business-logic","frontend"]}
