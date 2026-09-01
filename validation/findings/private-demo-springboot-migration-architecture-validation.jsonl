@@ -1,0 +1,1 @@
+{"findingId":"70c264759b7a","validator":"architecture","rule":"spring-idiom","location":"kitchensink-springboot/src/main/java/com/example/kitchensink/web/ui/MemberController.java","severity":"minor","status":"open","summary":"MemberController injects @Value via field injection; preferred Spring idiom is constructor injection.","loopId":"loop-1","ts":"2026-09-01T13:14:34Z"}
