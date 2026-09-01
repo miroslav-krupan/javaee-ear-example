@@ -1,13 +1,13 @@
 # Test Report — kitchensink-springboot
 
-> Generated: 2026-09-01 | Loop: loop-1 | Issue: #11
+> Generated: 2026-09-01 | Loop: loop-2 | Issue: #11
 > Validator: test-behavioral | Module: `kitchensink-springboot/`
 
 ---
 
 ## 1. Test Run Summary
 
-**Command:** `mvn clean test` (clean build required — see §4)
+**Command:** `mvn clean test`
 
 | Result | Count |
 |---|---|
@@ -125,10 +125,7 @@
 
 ---
 
-## 4. Build Note — Stale Artifact
+## 4. Prior Finding Resolution
 
-Running `mvn test` **without** a prior clean produces 14 ERROR tests across 6 classes due to a duplicate Flyway V1 migration in `target/classes/db/migration/`:
-- `V1__init.sql` (current source migration)
-- `V1__create_aa_registrant.sql` (stale artifact from a renamed prior migration)
-
-The stale file is not present in `src/main/resources/db/migration/` and is not tracked by git. Running `mvn clean test` clears it and all 46 tests pass. CI pipelines that run `clean` are unaffected. This is a minor local developer ergonomics issue.
+Loop-1 finding `bfeb8fb7aca8` (stale-artifact, minor) — **RESOLVED**.
+The persistence-specialist added `target/` and `**/target/` to `.gitignore` (commit `2feb509`). The stale `V1__create_aa_registrant.sql` is no longer present in `target/classes/db/migration/`. `mvn clean test` passes all 46 tests cleanly.
