@@ -1,4 +1,4 @@
-# Validation Report — loop-1
+# Validation Report — loop-2
 
 **Date:** 2026-09-01  
 **Result:** REWORK REQUIRED — 5 open findings
@@ -9,37 +9,45 @@
 
 | Validator | Result | Open Findings |
 |---|---|---|
-| Build & Startup | **FAIL** | 3 |
-| Test & Behavioral | **PASS** | 0 |
-| Architecture | **FAIL** | 2 |
+| Build & Startup | **PASS** | 0 (all 3 loop-1 findings resolved) |
+| Test & Behavioral | **FAIL** | 4 (coverage gaps) |
+| Architecture | **FAIL** | 1 (logback-spring.xml still absent) |
 | Security | **PASS** | 0 |
+
+---
+
+## Resolved This Loop
+
+| Finding | Validator | Summary |
+|---|---|---|
+| 850d5fb9 / mvn-verify | build-startup | `mvn verify` now passes — sequence + proxy fixed |
+| 200a3c35 / request-scope-proxy | build-startup | MemberListModel proxy added — ScopeNotActiveException gone |
+| 612a6209 / schema-validation | build-startup | IDENTITY strategy aligned — SchemaManagementException gone |
+| arch-loop1-002 / field-injection | architecture | MemberController.configKey moved to constructor injection |
+| F-TB-001 / mvn-test-pass | test-behavioral | 12/12 tests green (EXIT 0) |
 
 ---
 
 ## Open Findings
 
-### Build & Startup
+### Test & Behavioral
 
-**[850d5fb9] mvn-verify — build**  
-`mvn -q verify` exits 1: 5 test errors from two root causes — request-scope proxy missing (MemberRegistrationServiceTest) and Flyway/Hibernate sequence mismatch (MemberRepositoryTest x4).
+**[F-TB-002] coverage-completeness — test-coverage**  
+Coverage gaps 1–8 still absent — no Bean Validation unit tests added for Member constraints.
 
-**[200a3c35] request-scope-proxy — startup**  
-`MemberListModel` is `@RequestScope` but injected into singleton `MemberController` without a scoped proxy; `@SpringBootTest` context load fails with `ScopeNotActiveException`.  
-*Fix:* add `@Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)` to `MemberListModel`.
+**[F-TB-003] coverage-completeness — test-coverage**  
+Coverage gap #9 still absent — no `findById` not-found test added.
 
-**[612a6209] schema-validation — startup**  
-V1 Flyway migration uses `IDENTITY` column, not a sequence; Hibernate 6 `@GeneratedValue` (default `SEQUENCE`) expects `aa_registrant_seq`; `ddl-auto=validate` causes `@DataJpaTest` context to fail with `SchemaManagementException`.  
-*Fix:* add a V2 migration creating the sequence, or align `@GeneratedValue` strategy to `IDENTITY`.
+**[F-TB-004] coverage-completeness — test-coverage**  
+Coverage gap #12 still partial — `MemberRegistrationServiceTest` does not verify `MemberRegisteredEvent` publication.
+
+**[F-TB-005] coverage-completeness — test-coverage**  
+Coverage gap #19 still partial — no isolated unit test for `getRootErrorMessage` chained-exception extraction.
 
 ### Architecture
 
-**[arch-loop1-001] cited-file-missing — arch-drift**  
-`logback-spring.xml` absent from `src/main/resources/` — target-architecture §6 prescribes it as the mandatory replacement for the old `log4j.xml` in each WAR.  
-*Fix:* add `src/main/resources/logback-spring.xml`.
-
-**[arch-loop1-002] spring-idiom-field-injection — arch-drift**  
-`MemberController.configKey` uses `@Value` field injection (`private String configKey`) instead of constructor injection — Spring idiom requires all injection through the constructor.  
-*Fix:* move `@Value` parameter to the constructor signature.
+**[arch-loop2-001] cited-file-missing — arch-drift**  
+`logback-spring.xml` still absent from `src/main/resources/` — target-architecture §6 prescribes it as mandatory. Carries forward from arch-loop1-001; no specialist addressed this in loop-2.
 
 ---
 
@@ -51,4 +59,4 @@ None.
 
 ## Next Step
 
-Emitting `validation-failed` → Migration agent will perform targeted rework (loop-2).
+Bumping to loop-3 (final allowed loop). Emitting `validation-failed` → Migration agent targeted rework.
