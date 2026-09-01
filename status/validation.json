@@ -1,1 +1,1 @@
-{"state":"running","loopId":"loop-2","wokenAt":"2026-09-01T18:26:16Z"}
+{"state":"done","loopId":"loop-2","completedAt":"2026-09-01T18:32:08Z","result":"PASS","openBlockers":0,"openMajors":0,"openMinors":1}
