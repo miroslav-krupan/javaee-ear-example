@@ -1,9 +1,11 @@
 package com.example.kitchensink.service;
 
 import com.example.kitchensink.domain.Member;
+import com.example.kitchensink.web.MemberListModel;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -15,6 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
         })
 @Transactional
 class MemberRegistrationServiceTest {
+
+    @MockBean
+    @SuppressWarnings("unused")
+    private MemberListModel memberListModel;
 
     @Autowired
     private MemberRegistrationService memberRegistrationService;

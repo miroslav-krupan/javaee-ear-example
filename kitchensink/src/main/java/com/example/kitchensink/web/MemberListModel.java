@@ -5,6 +5,7 @@ import com.example.kitchensink.repository.MemberRepository;
 import com.example.kitchensink.service.MemberRegisteredEvent;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
@@ -12,7 +13,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.List;
 
 @Component
-@Scope(WebApplicationContext.SCOPE_REQUEST)
+@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class MemberListModel {
 
     private final MemberRepository memberRepository;
