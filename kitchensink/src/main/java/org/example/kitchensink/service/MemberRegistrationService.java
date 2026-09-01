@@ -24,6 +24,9 @@ public class MemberRegistrationService {
     @Transactional
     public void register(Member member) {
         log.info("Registering {}", member.getName());
+        if (memberRepository.findByEmail(member.getEmail()).isPresent()) {
+            throw new EmailAlreadyExistsException(member.getEmail());
+        }
         memberRepository.save(member);
         publisher.publishEvent(new MemberRegisteredEvent(member));
     }
