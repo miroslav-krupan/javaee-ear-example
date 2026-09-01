@@ -1,9 +1,10 @@
-# Validation Report — loop-1
+# Validation Report — loop-2 (FINAL)
 
 **Date:** 2026-09-01  
 **Issue:** miroslav-krupan/javaee-ear-example#9  
-**Loop:** loop-1  
-**Gate result:** ❌ FAIL — 1 open MAJOR finding
+**PR:** miroslav-krupan/javaee-ear-example#10  
+**Loop:** loop-2  
+**Gate result:** ✅ PASS — zero open blocker/major
 
 ---
 
@@ -12,37 +13,35 @@
 | Validator | Result | Findings |
 |---|---|---|
 | Build & Startup | ✅ PASS | 0 findings |
-| Test & Behavioral | ✅ PASS (32/32 green) | 1 minor |
-| Architecture | ✅ PASS | 1 minor |
-| Security | ❌ FAIL | 1 **major** |
+| Test & Behavioral | ✅ PASS (32/32 green) | 1 minor (carry-forward) |
+| Architecture | ✅ PASS | 2 minor |
+| Security | ✅ PASS | 1 major → **resolved** |
 
 ---
 
-## OPEN Findings
+## Resolved Findings
 
-### Major (blocking)
+| findingId | Severity | Summary |
+|---|---|---|
+| `23799dd64148` | ~~major~~ **resolved** | H2 web console (`spring.h2.console.enabled=true`) removed from `application.properties` — security regression fixed |
+
+---
+
+## Open Findings (non-blocking)
+
+### Minor
 
 | findingId | Validator | Rule | Location | Summary |
 |---|---|---|---|---|
-| `23799dd64148` | security | auth-downgrade | `kitchensink-springboot/src/main/resources/application.properties` | H2 web console enabled (`spring.h2.console.enabled=true`) — unauthenticated DB access endpoint introduced; original app had no such endpoint |
-
-### Minor (non-blocking)
-
-| findingId | Validator | Rule | Location | Summary |
-|---|---|---|---|---|
-| `f82eaf263d3d` | test-behavioral | coverage-gap | `gap-25-MemberListProducer-observer` | Gap 25 not covered: MemberListProducer @Observes Member observer pattern has no dedicated test |
-| `70c264759b7a` | architecture | spring-idiom | `kitchensink-springboot/src/main/java/com/example/kitchensink/web/ui/MemberController.java` | MemberController injects @Value via field injection; preferred Spring idiom is constructor injection |
+| `f82eaf263d3d` | test-behavioral | coverage-gap | `gap-25-MemberListProducer-observer` | Gap 25: no test for MemberListProducer observer pattern — CDI `@Observes` not preserved as Spring `@EventListener`; list refresh is now per-request DB fetch |
+| `70c264759b7a` | architecture | spring-idiom | `MemberController.java` | MemberController uses field injection for `@Value`; constructor injection is the preferred Spring idiom |
+| `dca67b021b1e` | architecture | arch-drift | `application-test.properties` | Architecture §4 prescribes test datasource config in `application-test.properties`; tests use inline `@TestPropertySource` instead; prescribed file and directory absent |
 
 ---
 
 ## Tests
 
-32 tests — all green. Full test story:
-
-<!-- test-report-embed -->
-### Test Summary (from Test & Behavioral Validation)
-
-**32/32 tests passing** — 1 migrated test + 31 new gap-coverage tests.
+**32/32 tests passing** — all green across both loops.
 
 | Test class | Tests | Pass |
 |---|---|---|
@@ -54,7 +53,7 @@
 | `MemberControllerTest` | 5 | ✅ |
 | **TOTAL** | **32** | **✅** |
 
-**1 gap still without a test:** Gap 25 — MemberListProducer observer (minor finding `f82eaf263d3d`).
+1 migrated test + 31 new gap-coverage tests. One gap without a test: Gap 25 (minor, documented above).
 
 See full test detail in [`validation/test-report.md`](test-report.md).
 
@@ -62,14 +61,15 @@ See full test detail in [`validation/test-report.md`](test-report.md).
 
 ## Parked Findings
 
-None — no finding has been open across ≥3 loops yet.
+None.
 
 ---
 
 ## Decision
 
-**FAIL.** Emitting `validation-failed` to route the 1 major finding back to Migration for targeted rework:
+**PASS.** Zero open blocker or major findings. PR #10 marked ready-for-review.
 
-- **`23799dd64148`** — Remove `spring.h2.console.enabled=true` from `application.properties` (move to `application-dev.properties` or delete entirely). This is a security regression vs. the original app.
-
-Loop will advance to **loop-2** after rework.
+Remaining open minors are documented known-issues for the human reviewer:
+- `f82eaf263d3d` — Gap 25 observer test missing
+- `70c264759b7a` — @Value field injection in MemberController
+- `dca67b021b1e` — application-test.properties absent; tests use @TestPropertySource
