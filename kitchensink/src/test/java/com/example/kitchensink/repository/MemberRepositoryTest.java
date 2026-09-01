@@ -44,6 +44,13 @@ class MemberRepositoryTest {
         assertFalse(found.isPresent());
     }
 
+    // Gap 9: findById not-found returns empty Optional
+    @Test
+    void testFindById_notFound() {
+        Optional<Member> found = memberRepository.findById(999L);
+        assertFalse(found.isPresent());
+    }
+
     @Test
     void testFindAllOrderedByName() {
         memberRepository.save(validMember("Zara Smith", "zara@example.com", "1234567890"));
