@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>kitchensink-ear</title>
+</head>
+<body>
+<div id="container">
+    <div id="content">
+        <h1>Welcome to Java EAR App 2 !</h1>
+
+        <div>
+            <p>You have successfully deployed a Java EE Enterprise Application.</p>
+        </div>
+
+        <div th:if="${successMessage}" class="valid" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="invalid" th:text="${errorMessage}"></div>
+
+        <form id="reg" th:action="@{/kitchensink-ear-web2/register}" th:object="${newMember}" method="post">
+            <h2>Member Registration</h2>
+            <p>Enforces annotation-based constraints defined on the model class.</p>
+
+            <table>
+                <tr>
+                    <td><label for="name">Name:</label></td>
+                    <td><input type="text" id="name" th:field="*{name}"/></td>
+                    <td><span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="invalid"></span></td>
+                </tr>
+                <tr>
+                    <td><label for="email">Email:</label></td>
+                    <td><input type="text" id="email" th:field="*{email}"/></td>
+                    <td><span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="invalid"></span></td>
+                </tr>
+                <tr>
+                    <td><label for="phoneNumber">Phone #:</label></td>
+                    <td><input type="text" id="phoneNumber" th:field="*{phoneNumber}"/></td>
+                    <td><span th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" class="invalid"></span></td>
+                </tr>
+            </table>
+
+            <p>
+                <input type="submit" id="register" value="Register" class="register"/>
+            </p>
+        </form>
+
+        <h2>Members</h2>
+        <em th:if="${#lists.isEmpty(members)}">No registered members.</em>
+        <table th:unless="${#lists.isEmpty(members)}" class="simpletablestyle">
+            <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone #</th>
+                <th>REST URL</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="member : ${members}">
+                <td th:text="${member.id}"></td>
+                <td th:text="${member.name}"></td>
+                <td th:text="${member.email}"></td>
+                <td th:text="${member.phoneNumber}"></td>
+                <td>
+                    <a th:href="@{/rest2/members/{id}(id=${member.id})}"
+                       th:text="'/rest2/members/' + ${member.id}"></a>
+                </td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr>
+                <td colspan="5">
+                    REST URL for all members: <a th:href="@{/rest2/members}">/rest2/members</a>
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div id="aside">
+        <p>Learn more about Red Hat JBoss Enterprise Application Platform.</p>
+    </div>
+
+    <div id="footer">
+        <p>This project was migrated from a Maven EAR archetype to Spring Boot.</p>
+    </div>
+</div>
+</body>
+</html>
