@@ -1,0 +1,1 @@
+{"findingId":"cba19eade379","validator":"architecture","rule":"optional-artifact-missing","location":"kitchensink-springboot/src/main/resources/application-prod.properties","severity":"minor","status":"open","summary":"application-prod.properties is absent; §5 layout lists it as a resource for prod datasource override","loopId":"loop-1","ts":"2026-09-01T18:07:16Z"}
