@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title th:text="${title ?: 'Kitchensink'}">Kitchensink</title>
+</head>
+<body>
+  <!-- layout body — Frontend specialist will implement Thymeleaf layout dialect -->
+  <div th:replace="${content}">content placeholder</div>
+</body>
+</html>
