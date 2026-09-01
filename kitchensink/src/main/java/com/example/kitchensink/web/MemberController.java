@@ -19,13 +19,14 @@ public class MemberController {
 
     private static final Logger log = LoggerFactory.getLogger(MemberController.class);
 
-    @Value("${config.key:Default value}")
-    private String configKey;
-
+    private final String configKey;
     private final MemberRegistrationService memberRegistrationService;
     private final MemberListModel memberListModel;
 
-    public MemberController(MemberRegistrationService memberRegistrationService, MemberListModel memberListModel) {
+    public MemberController(@Value("${config.key:Default value}") String configKey,
+                            MemberRegistrationService memberRegistrationService,
+                            MemberListModel memberListModel) {
+        this.configKey = configKey;
         this.memberRegistrationService = memberRegistrationService;
         this.memberListModel = memberListModel;
     }
