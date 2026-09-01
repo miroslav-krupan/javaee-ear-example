@@ -5,6 +5,21 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-  <!-- Changesets authored by the Persistence specialist -->
+  <changeSet id="1" author="persistence-specialist">
+    <createTable tableName="AA_Registrant">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="name" type="VARCHAR(25)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="email" type="VARCHAR(255)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="uk_aa_registrant_email"/>
+      </column>
+      <column name="phone_number" type="VARCHAR(12)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
 
 </databaseChangeLog>
