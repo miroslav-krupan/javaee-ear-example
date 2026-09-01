@@ -51,7 +51,7 @@ public class MemberController {
         return "redirect:/";
     }
 
-    private String getRootErrorMessage(Exception e) {
+    String getRootErrorMessage(Exception e) {
         String errorMessage = "Registration failed. See server log for more information";
         if (e == null) {
             return errorMessage;
