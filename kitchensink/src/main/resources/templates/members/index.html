@@ -2,9 +2,67 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8"/>
-  <title>Members</title>
+  <title>Members — Kitchensink</title>
 </head>
 <body>
-  <!-- member form + table — Frontend specialist will implement -->
+  <h1>Welcome to Kitchensink!</h1>
+  <p>You have successfully deployed a Java EE &rarr; Spring Boot migrated application.</p>
+
+  <div th:if="${successMessage}" class="valid" th:text="${successMessage}"></div>
+  <div th:if="${errorMessage}" class="invalid" th:text="${errorMessage}"></div>
+
+  <form th:action="@{/members}" th:object="${newMember}" method="post">
+    <h2>Member Registration</h2>
+    <p>Enforces annotation-based constraints defined on the model class.</p>
+    <table>
+      <tr>
+        <td><label for="name">Name:</label></td>
+        <td><input id="name" type="text" th:field="*{name}"/></td>
+        <td><span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="invalid"></span></td>
+      </tr>
+      <tr>
+        <td><label for="email">Email:</label></td>
+        <td><input id="email" type="text" th:field="*{email}"/></td>
+        <td><span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="invalid"></span></td>
+      </tr>
+      <tr>
+        <td><label for="phoneNumber">Phone #:</label></td>
+        <td><input id="phoneNumber" type="text" th:field="*{phoneNumber}"/></td>
+        <td><span th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" class="invalid"></span></td>
+      </tr>
+    </table>
+    <input type="submit" value="Register" class="register"/>
+  </form>
+
+  <h2>Members</h2>
+  <em th:if="${#lists.isEmpty(members)}">No registered members.</em>
+  <table th:unless="${#lists.isEmpty(members)}" class="simpletablestyle">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone #</th>
+        <th>REST URL</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="member : ${members}">
+        <td th:text="${member.id}"></td>
+        <td th:text="${member.name}"></td>
+        <td th:text="${member.email}"></td>
+        <td th:text="${member.phoneNumber}"></td>
+        <td>
+          <a th:href="@{/api/members/{id}(id=${member.id})}"
+             th:text="'/api/members/' + ${member.id}"></a>
+        </td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="5">REST URL for all members: <a th:href="@{/api/members}">/api/members</a></td>
+      </tr>
+    </tfoot>
+  </table>
 </body>
 </html>
