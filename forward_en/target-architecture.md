@@ -51,7 +51,7 @@ kitchensink/                      ← single Maven module
     │   │           └── AppConfig.java              (only if needed)
     │   └── resources/
     │       ├── application.properties
-    │       ├── db/migration/                       ← Flyway scripts (V1__init.sql)
+    │       ├── db/changelog/                       ← Liquibase (db.changelog-master.xml)
     │       └── templates/                          ← Thymeleaf templates
     │           ├── layout/default.html
     │           └── members/index.html
@@ -99,13 +99,13 @@ JAXB annotation `@XmlRootElement` is **removed** (JSON-only target; Jackson hand
 
 ### 2.3 DDL / Schema Strategy
 
-**Decision: Flyway** manages the schema. Owner: Persistence specialist.
+**Decision: Liquibase** manages the schema. Owner: Persistence specialist.
 
-- `spring.jpa.hibernate.ddl-auto=validate` in production (Flyway owns DDL; Hibernate validates only).
+- `spring.jpa.hibernate.ddl-auto=validate` in production (Liquibase owns DDL; Hibernate validates only).
 - `spring.jpa.hibernate.ddl-auto=create-drop` retained for local dev / unit tests only (H2 in-memory).
-- `V1__init_aa_registrant.sql` creates the `AA_Registrant` table with all columns and the unique constraint on `email`. The Persistence specialist authors this script.
+- Master changelog: `src/main/resources/db/changelog/db.changelog-master.xml`. The Persistence specialist authors the initial changeset that creates the `AA_Registrant` table with all columns and the unique constraint on `email`.
 
-**Rationale:** `create-drop` is destructive on restart (explicitly flagged as major risk by dependency analyst). Flyway provides audit trail, safe forward-only migrations, and is managed by the Spring Boot 3.4 BOM.
+**Rationale:** `create-drop` is destructive on restart (explicitly flagged as major risk by dependency analyst). Liquibase provides audit trail, safe forward-only changesets, XML/YAML/SQL changelog support, and is managed by the Spring Boot 3.4 BOM.
 
 ### 2.4 DataSource
 
@@ -314,7 +314,7 @@ The following stacks are all managed by the Spring Boot 3.4 BOM — no explicit 
 | `spring-boot-starter-thymeleaf` | JSF 2.2 (`provided`) |
 | `spring-boot-starter-validation` | Hibernate Validator (`provided`) |
 | `spring-boot-starter-logging` | SLF4J 1.x + Log4j 1.x |
-| `flyway-core` | `hibernate.hbm2ddl.auto` |
+| `liquibase-core` | `hibernate.hbm2ddl.auto` |
 | `spring-boot-starter-test` | Arquillian + JUnit 4 |
 | `com.h2database:h2` (test scope) | JBoss `test-ds.xml` |
 
@@ -324,7 +324,7 @@ The following stacks are all managed by the Spring Boot 3.4 BOM — no explicit 
 |---|---|---|
 | Java 21 + Spring Boot 3.4 | **Fully compatible** — LTS pair, GA combination | No compatibility concern |
 | JDBC driver for production DB | **NOT in BOM** — must be added manually | DB engine unknown; obtain from ops team |
-| Flyway community edition | In BOM (`flyway-core`) | Free tier sufficient for single-schema migration |
+| Liquibase | In BOM (`liquibase-core`) | Community edition sufficient for single-schema migration |
 | All other chosen libraries | In BOM | No manual version pinning needed |
 
 ---
