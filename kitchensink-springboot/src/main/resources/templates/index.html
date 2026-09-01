@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Kitchensink Member Registration</title>
+</head>
+<body>
+
+<h1>Member Registration</h1>
+
+<div th:if="${successMessage}" th:text="${successMessage}" style="color:green;"></div>
+<div th:if="${errorMessage}" th:text="${errorMessage}" style="color:red;"></div>
+
+<form th:action="@{/register}" th:object="${newMember}" method="post">
+    <div>
+        <label for="name">Name:</label>
+        <input type="text" id="name" th:field="*{name}"/>
+        <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color:red;"></span>
+    </div>
+    <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" th:field="*{email}"/>
+        <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" style="color:red;"></span>
+    </div>
+    <div>
+        <label for="phoneNumber">Phone:</label>
+        <input type="text" id="phoneNumber" th:field="*{phoneNumber}"/>
+        <span th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" style="color:red;"></span>
+    </div>
+    <button type="submit">Register</button>
+</form>
+
+<h2>Members</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="m : ${members}">
+        <td th:text="${m.id}"></td>
+        <td th:text="${m.name}"></td>
+        <td th:text="${m.email}"></td>
+        <td th:text="${m.phoneNumber}"></td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
